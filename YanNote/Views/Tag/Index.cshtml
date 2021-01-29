@@ -1,0 +1,59 @@
+﻿@model IEnumerable<YanNote.Models.Tag>
+
+    <div class="container p-3">
+        <div class="row pt-4">
+            <div class="col-6">
+                <h2 class="text-primary">Tag list</h2>
+            </div>
+            <div class="col-6 text-right">
+                <a asp-controller="Tag" asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> &nbsp; Create new tag
+                </a>
+            </div>
+        </div>
+
+        <br /><br />
+
+        @if (Model.Count() > 0)
+    {
+        <table class="table table-bordered table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>
+                        Tag
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var obj in Model)
+                {
+                <tr>
+                    <td width="50%">@obj.Name</td>
+                    
+                    <td class="text-center">
+                        <div class="w-75 btn-group" role="group">
+                            <a asp-controller="Tag" asp-route-Id="@obj.Id" asp-action="Edit" class="btn btn-primary mx-2"
+                               data-toggle="tooltip" data-placement="top" title="Edit">
+                                <i class="fas fa-edit"></i>
+                                
+                            </a>
+                            <a asp-controller="Tag" asp-route-Id="@obj.Id" asp-action="Delete" class="btn btn-danger mx-2"
+                               data-toggle="tooltip" data-placement="top" title="Delete">
+                                <i class="far fa-trash-alt"></i>
+                                
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p> No tag exists.</p>
+    }
+
+    </div>
+
