@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using YanNote.Data;
+using YanNote.Models;
 
 namespace YanNote.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(YanNoteContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -16,23 +16,9 @@ namespace YanNote.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .UseIdentityColumns()
+                .HasAnnotation("Relational:Collation", "SQL_Latin1_General_CP1_CI_AS")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.2");
-
-            modelBuilder.Entity("NoteTag", b =>
-                {
-                    b.Property<int>("NotesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TagsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("NotesId", "TagsId");
-
-                    b.HasIndex("TagsId");
-
-                    b.ToTable("NoteTag");
-                });
 
             modelBuilder.Entity("YanNote.Models.Note", b =>
                 {
@@ -44,6 +30,9 @@ namespace YanNote.Migrations
                     b.Property<DateTime>("NoteDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("TagId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -54,7 +43,24 @@ namespace YanNote.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TagId");
+
                     b.ToTable("Note");
+                });
+
+            modelBuilder.Entity("YanNote.Models.NoteTag", b =>
+                {
+                    b.Property<int>("NotesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TagsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("NotesId", "TagsId");
+
+                    b.HasIndex(new[] { "TagsId" }, "IX_NoteTag_TagsId");
+
+                    b.ToTable("NoteTag");
                 });
 
             modelBuilder.Entity("YanNote.Models.Rem", b =>
@@ -72,7 +78,7 @@ namespace YanNote.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NoteId")
+                    b.HasIndex(new[] { "NoteId" }, "IX_Rem_NoteId")
                         .IsUnique();
 
                     b.ToTable("Rem");
@@ -94,19 +100,30 @@ namespace YanNote.Migrations
                     b.ToTable("Tag");
                 });
 
-            modelBuilder.Entity("NoteTag", b =>
+            modelBuilder.Entity("YanNote.Models.Note", b =>
                 {
-                    b.HasOne("YanNote.Models.Note", null)
-                        .WithMany()
+                    b.HasOne("YanNote.Models.Tag", null)
+                        .WithMany("Notes")
+                        .HasForeignKey("TagId");
+                });
+
+            modelBuilder.Entity("YanNote.Models.NoteTag", b =>
+                {
+                    b.HasOne("YanNote.Models.Note", "Notes")
+                        .WithMany("NoteTags")
                         .HasForeignKey("NotesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("YanNote.Models.Tag", null)
-                        .WithMany()
+                    b.HasOne("YanNote.Models.Tag", "Tags")
+                        .WithMany("NoteTags")
                         .HasForeignKey("TagsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Notes");
+
+                    b.Navigation("Tags");
                 });
 
             modelBuilder.Entity("YanNote.Models.Rem", b =>
@@ -122,7 +139,16 @@ namespace YanNote.Migrations
 
             modelBuilder.Entity("YanNote.Models.Note", b =>
                 {
+                    b.Navigation("NoteTags");
+
                     b.Navigation("Rem");
+                });
+
+            modelBuilder.Entity("YanNote.Models.Tag", b =>
+                {
+                    b.Navigation("Notes");
+
+                    b.Navigation("NoteTags");
                 });
 #pragma warning restore 612, 618
         }

@@ -5,16 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using YanNote.Data;
+
 using YanNote.Models;
 
 namespace NoteMVC.Controllers
 {
     public class RemController : Controller
     {
-        private readonly ApplicationDbContext _db;
+        private readonly YanNoteContext _db;
 
-        public RemController(ApplicationDbContext db)
+        public RemController(YanNoteContext db)
         {
             _db = db;
         }

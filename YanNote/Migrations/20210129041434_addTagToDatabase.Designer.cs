@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using YanNote.Data;
+using YanNote.Models;
 
 namespace YanNote.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
+    [DbContext(typeof(YanNoteContext))]
     [Migration("20210129041434_addTagToDatabase")]
     partial class addTagToDatabase
     {

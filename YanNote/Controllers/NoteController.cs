@@ -7,18 +7,19 @@ using System.Collections.Generic;
 
 using System.Linq;
 using System.Threading.Tasks;
-using YanNote.Data;
+
 using YanNote.Models;
+using YanNote.Models.ViewModels;
 
 namespace NoteMVC.Controllers
 {
     public class NoteController : Controller
     {
 
-        private readonly ApplicationDbContext _db;
+        private readonly YanNoteContext _db;
         
         
-        public NoteController(ApplicationDbContext db)
+        public NoteController(YanNoteContext db)
         {
             
             _db = db;
@@ -26,39 +27,59 @@ namespace NoteMVC.Controllers
         
         public IActionResult Index()
         {        
-            IEnumerable<Note> objList = _db.Note.Include(t => t.Tags).Include(r => r.Rem);
+            IEnumerable<Note> objList = _db.Note.Include(r => r.Rem);
+            ViewBag.NoteTags = _db.NoteTag.Include(t => t.Tags);
             return View(objList);
         }
 
-        
+
 
         //GET - CREATE
         public IActionResult Create()
         {
-            ViewBag.Tags = _db.Tag.ToList();
-            
-            return View();
+            NoteVM noteVM = new NoteVM()
+            {
+                Note = new Note(),
+                TagSelectList = new List<SelectListItem>(),
+                NoteTags = null
+
+            };
+            foreach (Tag t in _db.Tag)
+            {
+                noteVM.TagSelectList.Add(
+                    new SelectListItem
+                    {
+                        Text = t.Name,
+                        Value = t.Id.ToString()
+                    });
+            }
+            return View(noteVM);
+
         }
 
         //POST - CREATE
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Note obj, int[] selectedTags)
+        public IActionResult Create(NoteVM noteVM)
         {
             if (ModelState.IsValid)
             {
-                Note newNote = new Note {Title = obj.Title, Text = obj.Text};
-                _db.Note.Add(newNote);                
-                if (selectedTags != null)
+                Note newNote = noteVM.Note;
+
+                if (noteVM.NoteTags != null)
                 {
-                    foreach (var t in _db.Tag.Where(u => selectedTags.Contains(u.Id))) {
-                        newNote.Tags.Add(t);
-                    } 
-                }                
+                    foreach (var t in _db.Tag)
+                    {
+                        if (noteVM.NoteTags.Contains(t.Id)) {
+                            NoteTag noteTag = new NoteTag { NotesId = newNote.Id, TagsId = t.Id };
+                            newNote.NoteTags.Add(noteTag); }
+                    }
+                }
+                _db.Note.Add(newNote);
                 _db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(obj);
+            return View(noteVM);
         }
 
         //GET - EDIT
@@ -68,40 +89,61 @@ namespace NoteMVC.Controllers
             {
                 return NotFound();
             }
-            var obj = _db.Note.Find(id);
-            if (obj == null)
+            NoteVM noteVM = new NoteVM()
+            {
+                Note = _db.Note.Find(id),
+                TagSelectList = new List<SelectListItem>(),
+                NoteTags = _db.NoteTag.Where(i => i.NotesId == id).Select(sc => sc.TagsId)
+
+            };
+            foreach (Tag t in _db.Tag)
+            {
+                noteVM.TagSelectList.Add(
+                    new SelectListItem
+                    {
+                        Text = t.Name,
+                        Value = t.Id.ToString()
+                    });
+            }
+
+            if (noteVM.Note == null)
             {
                 return NotFound();
             }
-            
-            ViewBag.Tags = _db.Tag.ToList();
-            return View(obj);
+
+
+            return View(noteVM);
         }
 
         //POST - EDIT
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Note obj, int[] selectedTags)
+        public IActionResult Edit(NoteVM noteVM)
         {
+            if (noteVM.Note == null)
+                return NotFound();
             if (ModelState.IsValid)
             {
-                               
-                Note newNote = _db.Note.Find(obj.Id);                
-                newNote.Title = obj.Title;
-                newNote.Text = obj.Text;
-                newNote.Tags.Clear();               
-                if (selectedTags != null)
+                Note newNote = noteVM.Note;
+                _db.Note.Remove(_db.Note.Find(newNote.Id));
+                _db.RemoveRange(_db.NoteTag.Where(i => i.NotesId == newNote.Id));
+                if (noteVM.NoteTags != null)
                 {
-                    foreach (var t in _db.Tag.Where(u => selectedTags.Contains(u.Id)))
+                    foreach (var t in _db.Tag)
                     {
-                        newNote.Tags.Add(t);
+                        if (noteVM.NoteTags.Contains(t.Id))
+                        {
+                            NoteTag noteTag = new NoteTag { NotesId = newNote.Id, TagsId = t.Id };
+                            newNote.NoteTags.Add(noteTag);
+                        }
                     }
-                }               
-                _db.Note.Update(newNote);
+                }
+                _db.Add(newNote);
                 _db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(obj);
+            return View(noteVM);
+            
 
         }
 

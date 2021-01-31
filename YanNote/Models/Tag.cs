@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+
+#nullable disable
 
 namespace YanNote.Models
 {
-    public class Tag
+    public partial class Tag
     {
-        [Key]
+        public Tag()
+        {
+            NoteTags = new HashSet<NoteTag>();
+        }
+
         public int Id { get; set; }
-        [Required]
         public string Name { get; set; }
-        public List<Note> Notes { get; set; } = new List<Note>();
+
+        public virtual ICollection<NoteTag> NoteTags { get; set; }
     }
 }

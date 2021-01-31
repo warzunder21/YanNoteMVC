@@ -46,27 +46,28 @@
                             <td>
                                 <div class="row">
                                     @if (obj.Rem != null)
-                                    {   <a asp-controller="Rem" asp-action="Index" class="btn btn-sm btn-outline-dark mx-2"
-                                    style="border:none; color:deepskyblue;" data-toggle="tooltip" data-placement="top" title="Reminder added">
+                                    {<a asp-controller="Rem" asp-action="Index" class="btn btn-sm btn-outline-dark mx-2"
+                                        style="border:none; color:deepskyblue;" data-toggle="tooltip" data-placement="top" title="Reminder added">
                                             <i class="fas fa-bell"></i>
-                                    </a>                                        
+                                        </a>
                                         <p style="padding-right: 10px;">@obj.Rem.EventDate.ToString("dd MMMM yyyy, HH:mm")</p>
-                                }
-                                else
-                                {<a asp-controller="Rem" asp-route-Id="@obj.Id" asp-action="Create" class="btn btn-sm btn-outline-primary mx-2"
-                                    style="border:none;" data-toggle="tooltip" data-placement="top" title="Add reminder">
-                                        <i class="far fa-bell"></i>
-                                    </a>}
-
+                                    }
+                                    else
+                                    {<a asp-controller="Rem" asp-route-Id="@obj.Id" asp-action="Create" class="btn btn-sm btn-outline-primary mx-2"
+                                        style="border:none;" data-toggle="tooltip" data-placement="top" title="Add reminder">
+                                            <i class="far fa-bell"></i>
+                                        </a>}
                                     <ul class="list-group list-group-horizontal">
-                                        @foreach (Tag t in obj.Tags)
+                                        @foreach (var t in ViewBag.NoteTags)
                                         {
+                                            if (t.Notes.Id==obj.Id) {
                                             <li class="list-group-item" style="padding: 0px; border: none; margin-right: 10px;">
-                                                <span class="badge badge-success">#@t.Name</span>
-                                            </li>
+                                                <span class="badge badge-success">#@t.Tags.Name</span>
+                                            </li>}
                                         }
                                     </ul>
-                                    </div>
+
+                                </div>
                             </td>
                             
                         </tr>
